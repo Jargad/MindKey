@@ -34,6 +34,8 @@ export default function VaultClient() {
   const searchParams = useSearchParams();
   const { vaultKey } = useVaultKey();
   const typeFilter   = searchParams.get("type") ?? "";
+  const newParam     = searchParams.get("new");
+  const defaultNewType = (newParam && newParam !== "1" && newParam !== "true") ? newParam : (typeFilter || "login");
 
   const [items, setItems]         = useState<VaultItem[]>([]);
   const [loading, setLoading]     = useState(true);
@@ -41,7 +43,7 @@ export default function VaultClient() {
   const [selected, setSelected]   = useState<VaultItem | null>(null);
   const [decrypted, setDecrypted]           = useState<Record<string, string>>({}); // id -> decryptedData (JSON)
   const [decryptedNames, setDecryptedNames] = useState<Record<string, string>>({}); // id -> decryptedName
-  const [showNew, setShowNew]               = useState(!!searchParams.get("new"));
+  const [showNew, setShowNew]               = useState(!!newParam);
   const [shareItem, setShareItem]           = useState<VaultItem | null>(null);
 
   const fetchItems = useCallback(async () => {
@@ -213,6 +215,7 @@ export default function VaultClient() {
       {showNew && (
         <ItemModal
           item={null}
+          defaultType={defaultNewType}
           decryptedName={null}
           decryptedJson={null}
           onClose={() => setShowNew(false)}

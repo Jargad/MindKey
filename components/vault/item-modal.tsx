@@ -30,8 +30,19 @@ const EMPTY_DATA: Record<string, object> = {
   totp:     { secret: "", issuer: "", label: "", digits: 6, period: 30 },
 };
 
+const NAME_PLACEHOLDERS: Record<string, string> = {
+  login:    "Mi cuenta de Gmail…",
+  card:     "Tarjeta Visa Débito…",
+  identity: "Pasaporte / DNI Principal…",
+  password: "Clave de WiFi Oficina…",
+  document: "Contrato / Licencia…",
+  note:     "Apuntes o notas privadas…",
+  totp:     "Autenticador 2FA (GitHub, AWS…)…",
+};
+
 interface Props {
   item: { id: string; encryptedName: string; type: string; encryptedData: string; isFavorite: boolean; tags: { id: string; name: string; color: string }[] } | null;
+  defaultType?: string;
   decryptedName: string | null;
   decryptedJson: string | null;
   onClose: () => void;
@@ -205,10 +216,11 @@ function EditForm({ type, data, onChange }: { type: string; data: Record<string,
   );
 }
 
-export default function ItemModal({ item, decryptedName, decryptedJson, onClose, onDelete, onShare, onRefresh, vaultKey }: Props) {
+export default function ItemModal({ item, defaultType, decryptedName, decryptedJson, onClose, onDelete, onShare, onRefresh, vaultKey }: Props) {
   const isNew  = !item;
+  const initialType = item?.type ?? (defaultType && TYPES.some((t) => t.value === defaultType) ? defaultType : "login");
   const [mode, setMode]     = useState<"view"|"edit">(isNew ? "edit" : "view");
-  const [type, setType]     = useState(item?.type ?? "login");
+  const [type, setType]     = useState(initialType);
   const [name, setName]     = useState(decryptedName ?? "");
   const [data, setData]     = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -276,7 +288,7 @@ export default function ItemModal({ item, decryptedName, decryptedJson, onClose,
             <>
               <div className="form-group">
                 <label className="form-label">Nombre</label>
-                <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder="Mi cuenta de Gmail…" />
+                <input className="input" value={name} onChange={(e) => setName(e.target.value)} placeholder={NAME_PLACEHOLDERS[type] || "Nombre del ítem…"} />
               </div>
               {isNew && (
                 <div className="form-group">
