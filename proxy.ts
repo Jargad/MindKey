@@ -5,14 +5,26 @@ const ACCESS_SECRET = new TextEncoder().encode(
   process.env.JWT_SECRET ?? "fallback-dev-secret"
 );
 
-const PUBLIC_PATHS = ["/login", "/register", "/share"];
-const API_PUBLIC   = ["/api/auth/login", "/api/auth/register", "/api/share", "/api/health"];
+const PUBLIC_PATHS = [
+  "/login",
+  "/register",
+  "/share",
+  "/manifest.json",
+  "/icon.svg",
+  "/favicon.ico",
+];
+const API_PUBLIC = [
+  "/api/auth/login",
+  "/api/auth/register",
+  "/api/share",
+  "/api/health",
+];
 
 export async function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl;
 
-  // Allow public paths
-  if (PUBLIC_PATHS.some((p) => pathname.startsWith(p))) return NextResponse.next();
+  // Allow public paths & static assets
+  if (PUBLIC_PATHS.some((p) => pathname === p || pathname.startsWith(p))) return NextResponse.next();
   if (API_PUBLIC.some((p) => pathname.startsWith(p)))   return NextResponse.next();
 
   const token = req.cookies.get("access_token")?.value;
@@ -35,5 +47,7 @@ export async function proxy(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],
+  matcher: [
+    "/((?!_next/static|_next/image|favicon.ico|manifest.json|icon.svg|.*\\.(?:svg|png|jpg|jpeg|gif|webp|ico|json)$).*)",
+  ],
 };
