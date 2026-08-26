@@ -8,6 +8,8 @@ import {
   Settings, LogOut, Tags, Share2,
 } from "lucide-react";
 
+import { useVaultKey } from "@/contexts/vault-key-context";
+
 const NAV_ITEMS = [
   { href: "/dashboard",  label: "Dashboard",  icon: LayoutDashboard },
   { href: "/vault",      label: "Todo el vault", icon: ShieldCheck },
@@ -28,9 +30,14 @@ function SidebarContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router   = useRouter();
+  const { clearSession, userEmail } = useVaultKey();
 
   async function handleLogout() {
+    if (userEmail) {
+      try { localStorage.setItem("gp_last_email", userEmail); } catch {}
+    }
     await fetch("/api/auth/logout", { method: "POST" });
+    clearSession();
     router.push("/login");
   }
 

@@ -1,20 +1,47 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { initVaultKey, useVaultKey } from "@/contexts/vault-key-context";
-import { Lock, Mail, Eye, EyeOff, ShieldCheck, LogIn } from "lucide-react";
+import { Lock, Mail, Eye, EyeOff, ShieldCheck, LogIn, UserCheck } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
   const { setSession } = useVaultKey();
-  const [email, setEmail]       = useState("");
-  const [password, setPassword] = useState("");
-  const [showPw, setShowPw]     = useState(false);
-  const [totp, setTotp]         = useState("");
+  const passwordRef    = useRef<HTMLInputElement>(null);
+  const emailRef       = useRef<HTMLInputElement>(null);
+
+  const [email, setEmail]               = useState("");
+  const [hasSavedEmail, setHasSavedEmail] = useState(false);
+  const [password, setPassword]         = useState("");
+  const [showPw, setShowPw]             = useState(false);
+  const [totp, setTotp]                 = useState("");
   const [totpRequired, setTotpRequired] = useState(false);
-  const [loading, setLoading]   = useState(false);
-  const [error, setError]       = useState("");
+  const [loading, setLoading]           = useState(false);
+  const [error, setError]               = useState("");
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("gp_last_email");
+      if (saved) {
+        setEmail(saved);
+        setHasSavedEmail(true);
+        // Autofocus directly on the master password input
+        setTimeout(() => {
+          passwordRef.current?.focus();
+        }, 50);
+      }
+    } catch {}
+  }, []);
+
+  function handleSwitchAccount() {
+    setHasSavedEmail(false);
+    setEmail("");
+    try { localStorage.removeItem("gp_last_email"); } catch {}
+    setTimeout(() => {
+      emailRef.current?.focus();
+    }, 50);
+  }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -23,7 +50,7 @@ export default function LoginPage() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, totpCode: totp || undefined }),
+        body: JSON.stringify({ email: email.trim(), password, totpCode: totp || undefined }),
       });
       const data = await res.json();
       if (!res.ok) {
@@ -31,6 +58,10 @@ export default function LoginPage() {
         setError(data.error ?? "Error al iniciar sesión");
         setLoading(false); return;
       }
+
+      // Save email for next time
+      try { localStorage.setItem("gp_last_email", email.trim()); } catch {}
+
       // Derive vault key in-browser
       await initVaultKey(password, data.user.salt, data.user.id, data.user.email, setSession);
       router.push("/dashboard");
@@ -51,16 +82,41 @@ export default function LoginPage() {
         </div>
 
         <h1 style={{ fontSize: "1.375rem", marginBottom: ".25rem" }}>Bienvenido de vuelta</h1>
-        <p style={{ fontSize: ".875rem", marginBottom: "1.75rem" }}>Ingresa con tu contraseña maestra</p>
+        <p style={{ fontSize: ".875rem", marginBottom: "1.75rem" }}>
+          {hasSavedEmail ? "Ingresa tu contraseña maestra para desbloquear el vault" : "Ingresa con tu contraseña maestra"}
+        </p>
 
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
           <div className="form-group">
-            <label className="form-label" htmlFor="email">Correo electrónico</label>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: ".375rem" }}>
+              <label className="form-label" htmlFor="email" style={{ margin: 0 }}>Correo electrónico</label>
+              {hasSavedEmail && (
+                <button
+                  type="button"
+                  onClick={handleSwitchAccount}
+                  style={{
+                    background: "none",
+                    border: "none",
+                    color: "var(--primary)",
+                    fontSize: ".75rem",
+                    cursor: "pointer",
+                    fontWeight: 600,
+                    padding: 0,
+                  }}
+                >
+                  Usar otra cuenta
+                </button>
+              )}
+            </div>
             <div className="relative">
               <Mail size={16} className="search-icon" style={{ left: ".75rem" }} />
               <input
+                ref={emailRef}
                 id="email" type="email" value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => {
+                  setEmail(e.target.value);
+                  if (hasSavedEmail) setHasSavedEmail(false);
+                }}
                 placeholder="tu@correo.com"
                 className="input input-icon-left" required autoComplete="email"
               />
@@ -72,6 +128,7 @@ export default function LoginPage() {
             <div className="relative">
               <Lock size={16} className="search-icon" style={{ left: ".75rem" }} />
               <input
+                ref={passwordRef}
                 id="password" type={showPw ? "text" : "password"} value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"

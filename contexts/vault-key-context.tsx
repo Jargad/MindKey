@@ -25,13 +25,16 @@ export function VaultKeyProvider({ children }: { children: ReactNode }) {
 
   const clearSession = useCallback(() => {
     if (vaultKey) toast.info("Vault bloqueado");
+    if (userEmail) {
+      try { localStorage.setItem("gp_last_email", userEmail); } catch {}
+    }
     setVaultKey(null);
     setUserSalt(null);
     setUserId(null);
     setUserEmail(null);
     sessionStorage.removeItem("gp_session");
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-  }, [vaultKey]);
+  }, [vaultKey, userEmail]);
 
   const resetTimer = useCallback(() => {
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -97,6 +100,10 @@ export function VaultKeyProvider({ children }: { children: ReactNode }) {
       setUserSalt(salt);
       setUserId(id);
       setUserEmail(email);
+
+      if (email) {
+        try { localStorage.setItem("gp_last_email", email); } catch {}
+      }
 
       // Persist to sessionStorage
       const raw = await crypto.subtle.exportKey("raw", key);
