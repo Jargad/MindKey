@@ -4,6 +4,10 @@ import * as schema from "./schema";
 
 const connectionString = process.env.DATABASE_URL;
 
+if (!connectionString) {
+  console.error("❌ [Database] CRITICAL: DATABASE_URL environment variable is missing in environment variables!");
+}
+
 const isInternalOrLocal =
   !connectionString ||
   connectionString.includes("localhost") ||
@@ -22,6 +26,7 @@ const pool =
     ssl: isInternalOrLocal ? false : { rejectUnauthorized: false },
     max: 10,
     idleTimeoutMillis: 30000,
+    connectionTimeoutMillis: 10000,
   });
 
 if (process.env.NODE_ENV !== "production") {
