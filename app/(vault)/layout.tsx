@@ -5,7 +5,7 @@ import { Suspense } from "react";
 import {
   ShieldCheck, LayoutDashboard, KeyRound, CreditCard, IdCard,
   Lock, FileText, StickyNote, Smartphone, Star, FolderOpen,
-  Settings, LogOut, Tags, Share2,
+  Settings, LogOut, Tags, Share2, Plus,
 } from "lucide-react";
 
 import { useVaultKey } from "@/contexts/vault-key-context";
@@ -100,11 +100,53 @@ function Sidebar() {
   );
 }
 
+function MobileBottomNav() {
+  const pathname = usePathname();
+
+  const isNavActive = (path: string) => {
+    if (path === "/vault") {
+      return pathname.startsWith("/vault");
+    }
+    return pathname === path;
+  };
+
+  return (
+    <nav className="mobile-bottom-nav">
+      <Link href="/dashboard" className={`mobile-nav-item ${isNavActive("/dashboard") ? "active" : ""}`}>
+        <LayoutDashboard size={20} />
+        <span>Inicio</span>
+      </Link>
+
+      <Link href="/vault" className={`mobile-nav-item ${isNavActive("/vault") ? "active" : ""}`}>
+        <ShieldCheck size={20} />
+        <span>Bóveda</span>
+      </Link>
+
+      <Link href="/vault?new=1" className="mobile-nav-add" aria-label="Nuevo elemento">
+        <Plus size={22} strokeWidth={2.5} />
+      </Link>
+
+      <Link href="/security" className={`mobile-nav-item ${isNavActive("/security") ? "active" : ""}`}>
+        <Lock size={20} />
+        <span>Seguridad</span>
+      </Link>
+
+      <Link href="/settings" className={`mobile-nav-item ${isNavActive("/settings") ? "active" : ""}`}>
+        <Settings size={20} />
+        <span>Ajustes</span>
+      </Link>
+    </nav>
+  );
+}
+
 export default function VaultLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="vault-layout">
       <Sidebar />
       <main className="vault-main">{children}</main>
+      <Suspense fallback={null}>
+        <MobileBottomNav />
+      </Suspense>
     </div>
   );
 }
