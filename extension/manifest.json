@@ -1,0 +1,28 @@
+{
+  "manifest_version": 3,
+  "name": "GetPass Extension",
+  "version": "1.0.0",
+  "description": "Accede a tus contraseñas de GetPass directamente desde el navegador.",
+  "permissions": ["storage", "activeTab", "cookies", "tabs"],
+  "host_permissions": ["*://localhost/*", "https://*/*"],
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": "icon.svg"
+  },
+  "icons": {
+    "128": "icon.svg"
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://localhost/*", "https://*/*"],
+      "js": ["content.js"],
+      "run_at": "document_start"
+    }
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; object-src 'self'"
+  }
+}

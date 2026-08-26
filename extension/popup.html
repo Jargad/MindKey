@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="UTF-8">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    :root {
+      --primary: #384C17;
+      --primary-hover: #2A3A11;
+      --bg: #FCFAEF;
+      --surface: #FFFFFF;
+      --text: #49170A;
+      --text-sec: #6B4A3A;
+      --border: #E8E3D3;
+      --radius: 4px;
+      --shadow: 0 4px 12px rgba(56, 76, 23, 0.1);
+    }
+
+    body {
+      width: 450px;
+      height: 550px;
+      padding: 0;
+      margin: 0;
+      font-family: 'Inter', -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      overflow: hidden;
+      /* Evita que el body scrollee */
+    }
+
+    .app-container {
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+      box-sizing: border-box;
+      height: 100%;
+    }
+
+    .header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .logo {
+      width: 40px;
+      height: 40px;
+      background: var(--primary);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: var(--shadow);
+    }
+
+    .title {
+      font-size: 22px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--text);
+    }
+
+    .card {
+      background: var(--surface);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid var(--border);
+      box-shadow: var(--shadow);
+    }
+
+    .input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      font-size: 15px;
+      transition: all 0.2s;
+      box-sizing: border-box;
+      background: var(--surface);
+      color: var(--text);
+    }
+
+    .input:focus {
+      outline: none;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(56, 76, 23, 0.1);
+    }
+
+    .btn {
+      width: 100%;
+      padding: 12px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: var(--radius);
+      font-weight: 600;
+      font-size: 15px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+    }
+
+    .btn-secondary {
+      background: var(--bg);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+
+    .item-list {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      flex: 1;
+      overflow-y: auto;
+      min-height: 0;
+      /* Crucial para scroll en flexbox */
+      padding-right: 4px;
+    }
+
+    .item {
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .item:hover {
+      border-color: var(--primary);
+      background: var(--bg);
+      transform: translateX(4px);
+    }
+
+    .item-icon {
+      width: 40px;
+      height: 40px;
+      background: var(--bg);
+      border-radius: var(--radius);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .item-info {
+      min-width: 0;
+      flex: 1;
+    }
+
+    .item-name {
+      font-weight: 700;
+      font-size: 15px;
+      display: block;
+      margin-bottom: 2px;
+    }
+
+    .item-user {
+      font-size: 13px;
+      color: var(--text-sec);
+    }
+
+    .spinner {
+      border: 3px solid var(--border);
+      border-top: 3px solid var(--primary);
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 0.8s linear infinite;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar {
+      width: 4px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app-container">
+    <div id="loading-view"
+      style="display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px;">
+      <div class="spinner"></div>
+      <p style="color: var(--text-sec); font-size: 14px; margin-top: 16px;">Verificando sesión...</p>
+    </div>
+
+    <!-- Vista de Autenticación -->
+    <div id="auth-view" style="display: none; flex: 1; flex-direction: column; justify-content: center;">
+      <div class="header" style="margin-bottom: 24px; justify-content: center;">
+        <div class="logo">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <span class="title">GetPass</span>
+      </div>
+
+      <div class="card">
+        <p style="font-size: 13px; color: var(--text-sec); margin-top: 0; text-align: center;">Ingresa tus credenciales
+          para desbloquear el vault.</p>
+        <input type="email" id="email" class="input" placeholder="Correo electrónico" style="margin-bottom: 10px;">
+        <input type="password" id="master-password" class="input" placeholder="Contraseña Maestra"
+          style="margin-bottom: 12px;">
+        <button id="unlock-btn" class="btn">Desbloquear</button>
+        <button id="change-user-btn"
+          style="display: none; background: none; border: none; color: var(--primary); font-size: 12px; cursor: pointer; margin-top: 12px; width: 100%; text-align: center;">
+          Cambiar de usuario
+        </button>
+      </div>
+    </div>
+
+    <!-- Vista del Vault -->
+    <div id="vault-view" style="display: none; flex: 1; flex-direction: column; height: 100%;">
+      <div class="header" style="margin-bottom: 16px;">
+        <div class="logo" style="width: 24px; height: 24px;">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+          </svg>
+        </div>
+        <span class="title" style="font-size: 16px;">Tus Contraseñas</span>
+      </div>
+
+      <input type="text" id="search" class="input" placeholder="Buscar en el vault..." style="margin-bottom: 16px;">
+
+      <div id="items" class="item-list"></div>
+
+      <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+        <button id="show-gen-btn" class="btn btn-secondary">
+          ⚙️ Generar Contraseña
+        </button>
+      </div>
+    </div>
+
+    <div id="gen-view" style="display: none; flex: 1; flex-direction: column;">
+      <div class="header" style="margin-bottom: 16px;">
+        <button id="back-vault-btn"
+          style="background: none; border: none; cursor: pointer; padding: 0; margin-right: 8px;">←</button>
+        <span class="title" style="font-size: 16px;">Generador</span>
+      </div>
+
+      <div class="card">
+        <input type="text" id="gen-result" class="input" readonly
+          style="font-family: monospace; font-size: 16px; text-align: center; margin-bottom: 12px; background: #f9fafb;">
+        <button id="regen-btn" class="btn" style="margin-bottom: 8px;">Generar Nueva</button>
+        <button id="copy-gen-btn" class="btn btn-secondary"
+          style="background: #f3f4f6; color: var(--text); border: 1px solid var(--border);">Copiar y Volver</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="crypto-port.js"></script>
+  <script src="popup.js"></script>
+</body>
+
+</html>
