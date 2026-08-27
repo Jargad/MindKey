@@ -619,6 +619,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 @media (max-width: 768px) {
   .sidebar { display: none; }
   .mobile-bottom-nav { display: flex; }
+  .hide-mobile { display: none !important; }
   .security-layout {
     grid-template-columns: 1fr;
     gap: 1rem;

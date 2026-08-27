@@ -1,7 +1,6 @@
 "use client";
-
 import { useEffect, useState, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { useVaultKey } from "@/contexts/vault-key-context";
 import { decrypt } from "@/lib/crypto";
 import {
@@ -28,9 +27,9 @@ interface VaultItem {
   tags: { id: string; name: string; color: string }[];
 }
 
-
-
 export default function VaultClient() {
+  const router       = useRouter();
+  const pathname     = usePathname();
   const searchParams = useSearchParams();
   const { vaultKey } = useVaultKey();
   const typeFilter   = searchParams.get("type") ?? "";
@@ -45,6 +44,29 @@ export default function VaultClient() {
   const [decryptedNames, setDecryptedNames] = useState<Record<string, string>>({}); // id -> decryptedName
   const [showNew, setShowNew]               = useState(!!newParam);
   const [shareItem, setShareItem]           = useState<VaultItem | null>(null);
+
+  // Sync showNew with query param or custom event
+  useEffect(() => {
+    if (newParam) {
+      setShowNew(true);
+    }
+  }, [newParam]);
+
+  useEffect(() => {
+    const handleOpenNew = () => setShowNew(true);
+    window.addEventListener("gp-open-new-item", handleOpenNew);
+    return () => window.removeEventListener("gp-open-new-item", handleOpenNew);
+  }, []);
+
+  const handleCloseNew = () => {
+    setShowNew(false);
+    if (searchParams.get("new")) {
+      const params = new URLSearchParams(searchParams.toString());
+      params.delete("new");
+      const qs = params.toString();
+      router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
+    }
+  };
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
@@ -129,7 +151,7 @@ export default function VaultClient() {
             style={{ height: 38 }}
           />
         </div>
-        <button className="btn btn-primary btn-sm" onClick={() => setShowNew(true)}>
+        <button className="btn btn-primary btn-sm hide-mobile" onClick={() => setShowNew(true)}>
           <Plus size={15} /> Nuevo
         </button>
       </header>
@@ -218,7 +240,7 @@ export default function VaultClient() {
           defaultType={defaultNewType}
           decryptedName={null}
           decryptedJson={null}
-          onClose={() => setShowNew(false)}
+          onClose={handleCloseNew}
           onRefresh={fetchItems}
           vaultKey={vaultKey}
         />

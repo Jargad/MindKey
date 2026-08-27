@@ -110,6 +110,13 @@ function MobileBottomNav() {
     return pathname === path;
   };
 
+  const handleAddClick = (e: React.MouseEvent) => {
+    if (pathname.startsWith("/vault")) {
+      e.preventDefault();
+      window.dispatchEvent(new CustomEvent("gp-open-new-item"));
+    }
+  };
+
   return (
     <nav className="mobile-bottom-nav">
       <Link href="/dashboard" className={`mobile-nav-item ${isNavActive("/dashboard") ? "active" : ""}`}>
@@ -122,7 +129,12 @@ function MobileBottomNav() {
         <span>Bóveda</span>
       </Link>
 
-      <Link href="/vault?new=1" className="mobile-nav-add" aria-label="Nuevo elemento">
+      <Link
+        href="/vault?new=1"
+        onClick={handleAddClick}
+        className="mobile-nav-add"
+        aria-label="Nuevo elemento"
+      >
         <Plus size={22} strokeWidth={2.5} />
       </Link>
 

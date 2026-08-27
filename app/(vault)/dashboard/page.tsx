@@ -129,7 +129,7 @@ export default function DashboardPage() {
           <h2 style={{ fontSize: "1.125rem", margin: 0 }}>Dashboard</h2>
           <p style={{ fontSize: ".8125rem", margin: 0 }}>Resumen de tu vault</p>
         </div>
-        <Link href="/vault?new=1" className="btn btn-primary btn-sm" style={{ marginLeft: "auto" }}>
+        <Link href="/vault?new=1" className="btn btn-primary btn-sm hide-mobile" style={{ marginLeft: "auto" }}>
           <Plus size={15} /> Nuevo
         </Link>
       </header>
