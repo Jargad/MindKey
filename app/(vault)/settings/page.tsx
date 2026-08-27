@@ -2,7 +2,10 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useVaultKey } from "@/contexts/vault-key-context";
-import { ShieldCheck, User, Lock, Smartphone, LogOut, KeyRound, Database, Download, Upload, FileText, ChevronRight } from "lucide-react";
+import {
+  ShieldCheck, User, Lock, Smartphone, LogOut, KeyRound,
+  Database, Download, Upload, FileText, ChevronRight,
+} from "lucide-react";
 import PasswordGenerator from "@/components/generator/password-generator";
 import { decrypt, encrypt } from "@/lib/crypto";
 import { toast } from "sonner";
@@ -10,15 +13,13 @@ import { toast } from "sonner";
 export default function SettingsPage() {
   const { vaultKey, userEmail, clearSession } = useVaultKey();
   const router = useRouter();
-  const [tab, setTab]           = useState<"account"|"security"|"generator"|"vault">("account");
+  const [tab, setTab]           = useState<"account"|"security"|"vault"|"generator">("account");
   const [loading, setLoading]   = useState(false);
-  const [currentPw, setCurrentPw] = useState("");
-  const [newPw, setNewPw]       = useState("");
-  const [confirmPw, setConfirmPw] = useState("");
-  const [saving, setSaving]     = useState(false);
-  const [msg, setMsg]           = useState<{ type: "ok"|"err"; text: string } | null>(null);
 
   async function handleLogout() {
+    if (userEmail) {
+      try { localStorage.setItem("gp_last_email", userEmail); } catch {}
+    }
     await fetch("/api/auth/logout", { method: "POST" });
     clearSession();
     router.push("/login");
@@ -93,7 +94,7 @@ export default function SettingsPage() {
   const TABS = [
     { id: "account",   label: "Cuenta",    icon: User },
     { id: "security",  label: "Seguridad", icon: Lock },
-    { id: "vault",     label: "Vault",     icon: Database },
+    { id: "vault",     label: "Bóveda",    icon: Database },
     { id: "generator", label: "Generador", icon: KeyRound },
   ] as const;
 
@@ -106,10 +107,31 @@ export default function SettingsPage() {
         </div>
       </header>
 
-      <div className="vault-content" style={{ maxWidth: 700, margin: "0 auto" }}>
-        <div style={{ display: "flex", gap: "1.5rem" }}>
-          {/* Sidebar tabs */}
-          <div style={{ width: 180, flexShrink: 0 }}>
+      <div className="vault-content">
+        <div className="settings-container">
+          {/* Mobile Horizontal Tabs */}
+          <div className="settings-tabs-mobile">
+            {TABS.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => setTab(id)}
+                className="category-chip"
+                style={{
+                  borderColor: tab === id ? "var(--primary)" : "var(--border)",
+                  background: tab === id ? "var(--primary-light)" : "var(--bg-card)",
+                  color: tab === id ? "var(--primary)" : "var(--text-primary)",
+                  fontWeight: tab === id ? 700 : 500,
+                }}
+              >
+                <Icon size={14} />
+                <span>{label}</span>
+              </button>
+            ))}
+          </div>
+
+          {/* Desktop Sidebar tabs */}
+          <div className="settings-sidebar">
             <nav style={{ display: "flex", flexDirection: "column", gap: ".25rem" }}>
               {TABS.map(({ id, label, icon: Icon }) => (
                 <button key={id} onClick={() => setTab(id)}
@@ -118,21 +140,21 @@ export default function SettingsPage() {
                 </button>
               ))}
               <hr className="divider" />
-              <button onClick={handleLogout} className="nav-item" style={{ color: "var(--danger)" }}>
+              <button onClick={handleLogout} className="nav-item" style={{ color: "var(--danger)", cursor: "pointer" }}>
                 <LogOut size={15} /> Cerrar sesión
               </button>
             </nav>
           </div>
 
-          {/* Content */}
-          <div style={{ flex: 1 }}>
+          {/* Content Area */}
+          <div className="settings-content-area">
 
             {tab === "account" && (
-              <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem" }}>
-                <h3 style={{ margin: 0 }}>Información de cuenta</h3>
+              <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1.25rem", padding: "1.25rem" }}>
+                <h3 style={{ margin: 0, fontSize: "1.0625rem" }}>Información de cuenta</h3>
                 <div className="form-group">
                   <label className="form-label">Correo electrónico</label>
-                  <div className="input" style={{ cursor: "default", color: "var(--text-secondary)" }}>
+                  <div className="input" style={{ cursor: "default", color: "var(--text-secondary)", wordBreak: "break-all" }}>
                     {userEmail ?? "—"}
                   </div>
                 </div>
@@ -141,20 +163,30 @@ export default function SettingsPage() {
                   borderRadius: "var(--radius-md)", padding: ".75rem .875rem",
                   fontSize: ".8125rem", display: "flex", gap: ".625rem", alignItems: "flex-start",
                 }}>
-                  <ShieldCheck size={14} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
-                  <span>Tu vault está protegido con <strong>AES-256-GCM</strong> y derivación de clave <strong>PBKDF2 (600,000 iteraciones)</strong>. Ningún dato está descifrado en el servidor.</span>
+                  <ShieldCheck size={16} color="var(--primary)" style={{ flexShrink: 0, marginTop: 2 }} />
+                  <span>Tu bóveda está protegida con <strong>AES-256-GCM</strong> y clave derivada con <strong>PBKDF2 (600,000 iteraciones)</strong>. El servidor jamás almacena tu clave maestra.</span>
+                </div>
+
+                <div style={{ borderTop: "1px solid var(--border)", paddingTop: "1rem", marginTop: ".5rem" }}>
+                  <button
+                    onClick={handleLogout}
+                    className="btn btn-danger"
+                    style={{ width: "100%", justifyContent: "center" }}
+                  >
+                    <LogOut size={16} /> Cerrar sesión
+                  </button>
                 </div>
               </div>
             )}
 
             {tab === "security" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <h3 style={{ margin: 0 }}>Autenticación en dos pasos (TOTP)</h3>
-                  <p style={{ fontSize: ".875rem" }}>
-                    Protege el acceso a tu cuenta con una app como Google Authenticator o Authy.
+                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1.25rem" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.0625rem" }}>Autenticación en dos pasos (TOTP)</h3>
+                  <p style={{ fontSize: ".875rem", margin: 0 }}>
+                    Protege el acceso a tu cuenta con una app autenticadora (Google Authenticator, Microsoft Authenticator o Authy).
                   </p>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: ".5rem" }}>
                     <div style={{ display: "flex", alignItems: "center", gap: ".5rem" }}>
                       <Smartphone size={16} color="var(--primary)" />
                       <span style={{ fontSize: ".875rem", fontWeight: 500 }}>TOTP 2FA</span>
@@ -163,8 +195,8 @@ export default function SettingsPage() {
                   </div>
                 </div>
 
-                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-                  <h3 style={{ margin: 0 }}>Información de seguridad</h3>
+                <div className="card" style={{ display: "flex", flexDirection: "column", gap: ".75rem", padding: "1.25rem" }}>
+                  <h3 style={{ margin: 0, fontSize: "1.0625rem" }}>Especificaciones de seguridad</h3>
                   {[
                     ["Algoritmo de cifrado", "AES-256-GCM"],
                     ["Función de derivación", "PBKDF2-SHA256"],
@@ -173,64 +205,64 @@ export default function SettingsPage() {
                     ["Cifrado del lado", "Cliente (navegador)"],
                     ["El servidor ve…", "Solo blobs cifrados"],
                   ].map(([k, v]) => (
-                    <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: ".875rem", padding: ".5rem 0", borderBottom: "1px solid var(--border)" }}>
+                    <div key={k} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", fontSize: ".8125rem", padding: ".4rem 0", borderBottom: "1px solid var(--border)", flexWrap: "wrap", gap: ".5rem" }}>
                       <span style={{ color: "var(--text-muted)" }}>{k}</span>
-                      <span style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: ".8125rem" }}>{v}</span>
+                      <span style={{ fontWeight: 600, fontFamily: "'JetBrains Mono', monospace", fontSize: ".75rem" }}>{v}</span>
                     </div>
                   ))}
                 </div>
               </div>
             )}
 
-            {tab === "generator" && (
-              <div className="card">
-                <h3 style={{ margin: "0 0 1.25rem" }}>Generador de contraseñas</h3>
-                <PasswordGenerator inline />
-              </div>
-            )}
-
             {tab === "vault" && (
               <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
                 {/* Export */}
-                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1.25rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: ".75rem" }}>
-                    <div style={{ background: "rgba(var(--primary-rgb), 0.1)", color: "var(--primary)", padding: ".5rem", borderRadius: "var(--radius-md)" }}>
+                    <div style={{ background: "rgba(var(--primary-rgb), 0.1)", color: "var(--primary)", padding: ".5rem", borderRadius: "var(--radius-md)", flexShrink: 0 }}>
                       <Download size={20} />
                     </div>
                     <div>
-                      <h3 style={{ margin: 0 }}>Exportar datos</h3>
+                      <h3 style={{ margin: 0, fontSize: "1.0625rem" }}>Exportar datos</h3>
                       <p style={{ fontSize: ".8125rem", color: "var(--text-muted)", margin: 0 }}>Descarga todos tus ítems en formato CSV descifrado.</p>
                     </div>
                   </div>
-                  <p style={{ fontSize: ".875rem", background: "rgba(var(--warning-rgb), 0.1)", color: "var(--warning)", padding: ".75rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--warning)" }}>
+                  <p style={{ fontSize: ".8125rem", background: "rgba(var(--warning-rgb), 0.1)", color: "var(--warning)", padding: ".75rem", borderRadius: "var(--radius-sm)", border: "1px solid var(--warning)", margin: 0 }}>
                     ⚠️ <strong>Atención:</strong> El archivo resultante estará <strong>sin cifrar</strong>. Guárdalo en un lugar seguro o bórralo tras usarlo.
                   </p>
-                  <button className="btn btn-primary" onClick={handleExport} disabled={loading}>
+                  <button className="btn btn-primary" onClick={handleExport} disabled={loading} style={{ width: "100%", justifyContent: "center" }}>
                     {loading ? <span className="spinner" /> : <><Download size={16} /> Descargar CSV (.csv)</>}
                   </button>
                 </div>
 
                 {/* Import */}
-                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
+                <div className="card" style={{ display: "flex", flexDirection: "column", gap: "1rem", padding: "1.25rem" }}>
                   <div style={{ display: "flex", alignItems: "center", gap: ".75rem" }}>
-                    <div style={{ background: "rgba(var(--success-rgb), 0.1)", color: "var(--success)", padding: ".5rem", borderRadius: "var(--radius-md)" }}>
+                    <div style={{ background: "rgba(var(--success-rgb), 0.1)", color: "var(--success)", padding: ".5rem", borderRadius: "var(--radius-md)", flexShrink: 0 }}>
                       <Upload size={20} />
                     </div>
                     <div>
-                      <h3 style={{ margin: 0 }}>Importar datos</h3>
+                      <h3 style={{ margin: 0, fontSize: "1.0625rem" }}>Importar datos</h3>
                       <p style={{ fontSize: ".8125rem", color: "var(--text-muted)", margin: 0 }}>Sube un archivo CSV para importar ítems masivamente.</p>
                     </div>
                   </div>
                   <div style={{ position: "relative" }}>
-                    <input type="file" accept=".csv" onChange={handleImport} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer" }} disabled={loading} />
-                    <button className="btn btn-secondary" style={{ width: "100%" }} disabled={loading}>
+                    <input type="file" accept=".csv" onChange={handleImport} style={{ position: "absolute", inset: 0, opacity: 0, cursor: "pointer", width: "100%", height: "100%" }} disabled={loading} />
+                    <button className="btn btn-secondary" style={{ width: "100%", justifyContent: "center" }} disabled={loading}>
                       {loading ? <span className="spinner" /> : <><Upload size={16} /> Seleccionar archivo CSV</>}
                     </button>
                   </div>
-                  <p style={{ fontSize: ".75rem", color: "var(--text-muted)", textAlign: "center" }}>
-                    Formato esperado: <code>nombre, tipo, usuario, contraseña, url, notas</code>
+                  <p style={{ fontSize: ".75rem", color: "var(--text-muted)", textAlign: "center", margin: 0, wordBreak: "break-all" }}>
+                    Formato: <code>nombre, tipo, usuario, contraseña, url, notas</code>
                   </p>
                 </div>
+              </div>
+            )}
+
+            {tab === "generator" && (
+              <div className="card" style={{ padding: "1.25rem" }}>
+                <h3 style={{ margin: "0 0 1.25rem", fontSize: "1.0625rem" }}>Generador de contraseñas</h3>
+                <PasswordGenerator inline />
               </div>
             )}
 
