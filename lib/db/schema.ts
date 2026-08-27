@@ -59,6 +59,7 @@ export const vaultItems = pgTable("vault_items", {
     onDelete: "set null",
   }),
   isFavorite: boolean("is_favorite").notNull().default(false),
+  isIgnoredFromAudit: boolean("is_ignored_from_audit").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

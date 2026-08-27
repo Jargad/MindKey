@@ -24,7 +24,7 @@ const TYPE_META: Record<string, { label: string; icon: React.ElementType; cls: s
 
 interface VaultItem {
   id: string; encryptedName: string; type: string; encryptedData: string;
-  folderId: string | null; isFavorite: boolean; updatedAt: string;
+  folderId: string | null; isFavorite: boolean; isIgnoredFromAudit?: boolean; updatedAt: string;
   tags: { id: string; name: string; color: string }[];
 }
 

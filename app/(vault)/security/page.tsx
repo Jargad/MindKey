@@ -14,6 +14,7 @@ interface VaultItem {
   encryptedName: string;
   type: string;
   encryptedData: string;
+  isIgnoredFromAudit?: boolean;
 }
 
 interface AuditResult {
@@ -30,34 +31,47 @@ export default function SecurityAuditPage() {
   const [loading, setLoading]                 = useState(true);
   const [decryptedData, setDecryptedData]     = useState<Record<string, any>>({});
   const [decryptedNames, setDecryptedNames]   = useState<Record<string, string>>({});
-  const [ignoredIds, setIgnoredIds]           = useState<string[]>([]);
   const [showIgnored, setShowIgnored]         = useState(false);
 
-  // Load ignored IDs from localStorage
-  useEffect(() => {
-    try {
-      const saved = localStorage.getItem("gp_ignored_audit_ids");
-      if (saved) {
-        setIgnoredIds(JSON.parse(saved));
-      }
-    } catch {}
-  }, []);
+  // Sync ignore state with PostgreSQL database
+  const toggleIgnore = async (id: string) => {
+    const item = items.find((i) => i.id === id);
+    if (!item) return;
 
-  // Save ignored IDs
-  const toggleIgnore = (id: string) => {
-    setIgnoredIds((prev) => {
-      const exists = prev.includes(id);
-      const next = exists ? prev.filter((item) => item !== id) : [...prev, id];
-      try {
-        localStorage.setItem("gp_ignored_audit_ids", JSON.stringify(next));
-      } catch {}
-      if (exists) {
-        toast.success("Elemento reactivado en la auditoría");
-      } else {
-        toast.info("Elemento ignorado de la auditoría");
+    const newIgnoredState = !item.isIgnoredFromAudit;
+
+    // Optimistic UI update
+    setItems((prev) =>
+      prev.map((i) => (i.id === id ? { ...i, isIgnoredFromAudit: newIgnoredState } : i))
+    );
+
+    if (newIgnoredState) {
+      toast.info("Elemento ignorado y sincronizado en tu cuenta");
+    } else {
+      toast.success("Elemento reactivado en la auditoría");
+    }
+
+    try {
+      const res = await fetch(`/api/vault/${id}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ isIgnoredFromAudit: newIgnoredState }),
+      });
+
+      if (!res.ok) {
+        // Rollback on error
+        setItems((prev) =>
+          prev.map((i) => (i.id === id ? { ...i, isIgnoredFromAudit: !newIgnoredState } : i))
+        );
+        toast.error("Error al sincronizar con el servidor");
       }
-      return next;
-    });
+    } catch {
+      // Rollback on network failure
+      setItems((prev) =>
+        prev.map((i) => (i.id === id ? { ...i, isIgnoredFromAudit: !newIgnoredState } : i))
+      );
+      toast.error("Error de conexión al sincronizar");
+    }
   };
 
   useEffect(() => {
@@ -108,10 +122,11 @@ export default function SecurityAuditPage() {
     if (Object.keys(decryptedData).length === 0) return res;
 
     const passwords: Record<string, string[]> = {};
-    const ignoredSet = new Set(ignoredIds);
+    const itemMap = new Map(items.map((i) => [i.id, i]));
 
     Object.entries(decryptedData).forEach(([id, data]) => {
-      if (ignoredSet.has(id)) {
+      const item = itemMap.get(id);
+      if (item?.isIgnoredFromAudit) {
         res.ignored.push(id);
         return;
       }
@@ -143,7 +158,7 @@ export default function SecurityAuditPage() {
     }
 
     return res;
-  }, [items.length, decryptedData, ignoredIds]);
+  }, [items, decryptedData]);
 
   if (loading) {
     return (

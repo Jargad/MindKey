@@ -6,12 +6,13 @@ import { eq, and, ilike, or } from "drizzle-orm";
 import { z } from "zod";
 
 const createSchema = z.object({
-  type:          z.enum(["login","card","identity","password","document","note","totp"]),
-  encryptedName: z.string().min(1),
-  encryptedData: z.string().min(1),
-  folderId:      z.string().uuid().optional().nullable(),
-  tagIds:        z.array(z.string().uuid()).optional(),
-  isFavorite:    z.boolean().optional(),
+  type:               z.enum(["login","card","identity","password","document","note","totp"]),
+  encryptedName:      z.string().min(1),
+  encryptedData:      z.string().min(1),
+  folderId:           z.string().uuid().optional().nullable(),
+  tagIds:             z.array(z.string().uuid()).optional(),
+  isFavorite:         z.boolean().optional(),
+  isIgnoredFromAudit: z.boolean().optional(),
 });
 
 // GET /api/vault?type=login&folderId=xxx&tagId=xxx

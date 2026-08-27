@@ -6,11 +6,12 @@ import { eq, and } from "drizzle-orm";
 import { z } from "zod";
 
 const updateSchema = z.object({
-  encryptedName: z.string().min(1).optional(),
-  encryptedData: z.string().min(1).optional(),
-  folderId:      z.string().uuid().nullable().optional(),
-  tagIds:        z.array(z.string().uuid()).optional(),
-  isFavorite:    z.boolean().optional(),
+  encryptedName:      z.string().min(1).optional(),
+  encryptedData:      z.string().min(1).optional(),
+  folderId:           z.string().uuid().nullable().optional(),
+  tagIds:             z.array(z.string().uuid()).optional(),
+  isFavorite:         z.boolean().optional(),
+  isIgnoredFromAudit: z.boolean().optional(),
 });
 
 // GET /api/vault/[id]
