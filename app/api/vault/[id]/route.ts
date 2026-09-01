@@ -12,6 +12,8 @@ const updateSchema = z.object({
   tagIds:             z.array(z.string().uuid()).optional(),
   isFavorite:         z.boolean().optional(),
   isIgnoredFromAudit: z.boolean().optional(),
+  useCount:           z.number().int().nonnegative().optional(),
+  lastUsedAt:         z.string().datetime().optional().nullable(),
 });
 
 // GET /api/vault/[id]
@@ -41,9 +43,17 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
   const { tagIds, ...rest } = parsed.data;
 
+  const updateData: Record<string, any> = {
+    ...rest,
+    updatedAt: new Date(),
+  };
+  if (rest.lastUsedAt !== undefined) {
+    updateData.lastUsedAt = rest.lastUsedAt ? new Date(rest.lastUsedAt) : null;
+  }
+
   const [item] = await db
     .update(vaultItems)
-    .set({ ...rest, updatedAt: new Date() })
+    .set(updateData)
     .where(and(eq(vaultItems.id, id), eq(vaultItems.userId, userId)))
     .returning();
 

@@ -635,6 +635,10 @@ textarea.input { resize: vertical; min-height: 80px; }
   min-width: 0;
 }
 
+.sort-wrap {
+  flex-shrink: 0;
+}
+
 /* ─── Responsive ─────────────────────────────────────────────────────────────── */
 @media (max-width: 768px) {
   .sidebar { display: none; }
@@ -677,6 +681,11 @@ textarea.input { resize: vertical; min-height: 80px; }
   }
   .search-wrap {
     order: 3;
+    max-width: 100%;
+    width: 100%;
+  }
+  .sort-wrap {
+    order: 4;
     max-width: 100%;
     width: 100%;
   }

@@ -8,7 +8,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: { default: "GetPass — Gestor de Contraseñas Seguro", template: "%s | GetPass" },
+  title: { default: "Mindkey — Gestor de Contraseñas Seguro", template: "%s | Mindkey" },
   description: "Gestor de contraseñas con cifrado zero-knowledge AES-256-GCM. Guarda logins, tarjetas, identidades, notas y más con seguridad total.",
   keywords: ["gestor de contraseñas", "password manager", "seguridad", "cifrado", "AES-256"],
   manifest: "/manifest.json",

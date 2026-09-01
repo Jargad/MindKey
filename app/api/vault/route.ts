@@ -13,6 +13,8 @@ const createSchema = z.object({
   tagIds:             z.array(z.string().uuid()).optional(),
   isFavorite:         z.boolean().optional(),
   isIgnoredFromAudit: z.boolean().optional(),
+  useCount:           z.number().int().nonnegative().optional(),
+  lastUsedAt:         z.string().datetime().optional().nullable(),
 });
 
 // GET /api/vault?type=login&folderId=xxx&tagId=xxx
@@ -74,7 +76,12 @@ export async function POST(req: Request) {
 
   const [item] = await db
     .insert(vaultItems)
-    .values({ ...rest, userId, folderId: rest.folderId ?? null })
+    .values({
+      ...rest,
+      lastUsedAt: rest.lastUsedAt ? new Date(rest.lastUsedAt) : undefined,
+      userId,
+      folderId: rest.folderId ?? null,
+    })
     .returning();
 
   if (tagIds && tagIds.length > 0) {

@@ -1,6 +1,6 @@
 {
-  "name": "GetPass Password Manager",
-  "short_name": "GetPass",
+  "name": "Mindkey Password Manager",
+  "short_name": "Mindkey",
   "description": "Zero-Knowledge Password Manager with AES-256 encryption.",
   "start_url": "/",
   "display": "standalone",

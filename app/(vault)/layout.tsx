@@ -50,12 +50,12 @@ function SidebarContent() {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">
+      <Link href="/dashboard" className="sidebar-logo" style={{ textDecoration: "none", color: "inherit", cursor: "pointer" }}>
         <div className="sidebar-logo-icon">
           <ShieldCheck size={20} color="#fff" />
         </div>
-        <span className="sidebar-logo-text">GetPass</span>
-      </div>
+        <span className="sidebar-logo-text">Mindkey</span>
+      </Link>
 
       <nav className="nav-section">
         {NAV_ITEMS.map(({ href, label, icon: Icon }) => (

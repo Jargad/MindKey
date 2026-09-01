@@ -57,7 +57,7 @@ export default function RegisterPage() {
           <div className="auth-logo-icon">
             <ShieldCheck size={26} color="#fff" />
           </div>
-          <span style={{ fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-.03em" }}>GetPass</span>
+          <span style={{ fontSize: "1.5rem", fontWeight: 800, letterSpacing: "-.03em" }}>Mindkey</span>
         </div>
 
         <h1 style={{ fontSize: "1.375rem", marginBottom: ".25rem" }}>Crear cuenta</h1>

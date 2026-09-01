@@ -89,7 +89,7 @@ export default function ShareViewPage({ params }: { params: Promise<{ token: str
             <ShieldCheck size={22} color="#fff" />
           </div>
           <div>
-            <div style={{ fontWeight: 800, fontSize: "1.125rem" }}>GetPass</div>
+            <div style={{ fontWeight: 800, fontSize: "1.125rem" }}>Mindkey</div>
             <div style={{ fontSize: ".75rem", color: "var(--text-muted)" }}>Ítem compartido cifrado</div>
           </div>
         </div>

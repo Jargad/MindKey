@@ -60,6 +60,8 @@ export const vaultItems = pgTable("vault_items", {
   }),
   isFavorite: boolean("is_favorite").notNull().default(false),
   isIgnoredFromAudit: boolean("is_ignored_from_audit").notNull().default(false),
+  useCount: integer("use_count").notNull().default(0),
+  lastUsedAt: timestamp("last_used_at"),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
