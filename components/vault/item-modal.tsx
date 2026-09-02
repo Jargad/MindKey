@@ -295,9 +295,13 @@ export default function ItemModal({ item, defaultType, decryptedName, decryptedJ
                   <label className="form-label">Tipo</label>
                   <div style={{ display: "flex", flexWrap: "wrap", gap: ".5rem" }}>
                     {TYPES.map(({ value, label, icon: Icon }) => (
-                      <button key={value} type="button"
+                      <button
+                        key={value}
+                        type="button"
+                        tabIndex={-1}
                         onClick={() => handleTypeChange(value)}
-                        className={`btn btn-sm ${type === value ? "btn-primary" : "btn-secondary"}`}>
+                        className={`btn btn-sm ${type === value ? "btn-primary" : "btn-secondary"}`}
+                      >
                         <Icon size={14} /> {label}
                       </button>
                     ))}
